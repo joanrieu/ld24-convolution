@@ -164,8 +164,14 @@ int main() {
 
         Grid grid;
 
-        // TODO: AI
-        // TODO: Beginning
+        patterns[8].make(&grid, &enemyTeam, sf::Vector2i(-20, -10));
+        patterns[7].make(&grid, &playerTeam, sf::Vector2i(-14, -7));
+        patterns[9].make(&grid, &playerTeam, sf::Vector2i(4, 0));
+        patterns[7].make(&grid, &enemyTeam, sf::Vector2i(10, -7));
+        patterns[7].make(&grid, &enemyTeam, sf::Vector2i(15, -15));
+        patterns[7].make(&grid, &enemyTeam, sf::Vector2i(13, 7));
+
+        // TODO: AI ?
 
         sf::Music music;
         music.openFromFile("distant.ogg");
@@ -179,7 +185,7 @@ int main() {
         const int scoreMultiplier = 10;
 
         const float scaleStep = 1.5f;
-        float scaling = 100.f;
+        float scaling = 20.f;
         sf::Vector2i gridAim;
 
         while (win.isOpen()) {
@@ -212,6 +218,9 @@ int main() {
 #                       undef BIND
 
                 }
+
+                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Back))
+                        grid.update();
 
                 win.clear(bgColor);
 
