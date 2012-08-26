@@ -3,11 +3,12 @@
 struct Team {
         std::string name;
         sf::Color color;
+        float score;
 };
 
 struct Cell {
         Team* team;
-        int lives;
+        bool undead;
 };
 
 enum class Stuff {
@@ -77,21 +78,22 @@ void Grid::update() {
                         Cell cell = cellIt->second;
                         cell.team = winningTeam;
 
-                        if (neighbourCount == 2 or neighbourCount == 3 or --cell.lives > 0)
+                        if (neighbourCount == 2 or neighbourCount == 3 or cell.undead)
                                 nextCells.insert(std::make_pair(cellPos, cell));
+                        else
+                                stuff.insert(std::make_pair(cellPos, Stuff::DeadCell));
 
                 } else if (neighbourCount == 3) { // Cells can only appear with three neighbours
 
                         Cell cell;
                         cell.team = winningTeam;
-                        cell.lives = 1;
 
                         auto stuffIt = stuff.find(cellPos);
 
                         if (stuffIt != stuff.end()) {
 
                                 if (stuffIt->second == Stuff::DeadCell)
-                                        ++cell.lives;
+                                        cell.team->score *= 1.05f;
 
                                 stuff.erase(stuffIt);
 
@@ -109,25 +111,25 @@ void Grid::update() {
 
 int main() {
 
-        Team playerTeam = { "Player", sf::Color(200, 50, 50) };
-        Team enemy1Team = { "Enemy 1", sf::Color(50, 200, 50) };
-        Team enemy2Team = { "Enemy 2", sf::Color(50, 50, 200) };
-        Cell playerCell = { &playerTeam, 1 };
-        Cell enemy1Cell = { &enemy1Team, 1 };
-        Cell enemy2Cell = { &enemy2Team, 1 };
+        Team playerTeam = { "Player", sf::Color(200, 50, 50), 1.f };
+        Team enemy1Team = { "Enemy 1", sf::Color(50, 200, 50), 1.f };
+        Team enemy2Team = { "Enemy 2", sf::Color(50, 50, 200), 1.f };
+        Cell playerCell = { &playerTeam, false };
+        Cell enemy1Cell = { &enemy1Team, false };
+        Cell enemy2Cell = { &enemy2Team, false };
 
         Grid grid;
         grid.cells.insert(std::make_pair(sf::Vector2i(0, 0), playerCell));
         grid.cells.insert(std::make_pair(sf::Vector2i(1, 0), playerCell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(2, 0), playerCell));/*
+        grid.cells.insert(std::make_pair(sf::Vector2i(2, 0), playerCell));
         grid.cells.insert(std::make_pair(sf::Vector2i(2, -1), playerCell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(1, -2), playerCell));
+        grid.cells.insert(std::make_pair(sf::Vector2i(1, -2), playerCell));/*
         grid.cells.insert(std::make_pair(sf::Vector2i(0, 1), enemy1Cell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(1, 1), enemy1Cell));*/
-        grid.cells.insert(std::make_pair(sf::Vector2i(2, 1), enemy1Cell));/*
-        grid.cells.insert(std::make_pair(sf::Vector2i(0, 2), enemy2Cell));*/
+        grid.cells.insert(std::make_pair(sf::Vector2i(1, 1), enemy1Cell));
+        grid.cells.insert(std::make_pair(sf::Vector2i(2, 1), enemy1Cell));
+        grid.cells.insert(std::make_pair(sf::Vector2i(0, 2), enemy2Cell));
         grid.cells.insert(std::make_pair(sf::Vector2i(1, 2), enemy2Cell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(2, 2), enemy2Cell));
+        grid.cells.insert(std::make_pair(sf::Vector2i(2, 2), enemy2Cell));*/
 
         sf::RenderWindow win(sf::VideoMode(800, 600), "Convolution");
         win.setVerticalSyncEnabled(true);
