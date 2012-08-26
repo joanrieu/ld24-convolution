@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <iostream>
 
 struct Team {
         std::string name;
@@ -151,7 +152,7 @@ int main() {
 
 #                       define BIND(keyname, action) else if (event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::keyname) action
                         BIND(Escape, win.close());
-                        BIND(Space, grid.update());
+                        BIND(Space, { grid.update(); std::cout << playerTeam.score << std::endl; })
                         BIND(Add, scaling *= scaleStep);
                         BIND(Subtract, scaling /= scaleStep);
                         BIND(Up, gridAim.y -= moveStep);
