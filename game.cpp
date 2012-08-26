@@ -202,7 +202,7 @@ int main() {
                         BIND(PageUp, patternIndex = (patterns.size() + patternIndex - 1) % patterns.size());
                         BIND(PageDown, patternIndex = (patternIndex + 1) % patterns.size());
                         BIND(Return, {
-                                if (patterns[patternIndex].cost <= playerTeam.score) {
+                                if (patterns[patternIndex].cost <= playerTeam.score and grid.stuff.find(gridAim) != grid.stuff.end()) {
                                         playerTeam.score -= patterns[patternIndex].cost;
                                         patterns[patternIndex].make(&grid, &playerTeam, gridAim);
                                 }
