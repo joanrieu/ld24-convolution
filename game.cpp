@@ -132,7 +132,7 @@ int main() {
         grid.cells.insert(std::make_pair(sf::Vector2i(1, 2), enemy2Cell));
         grid.cells.insert(std::make_pair(sf::Vector2i(2, 2), enemy2Cell));*/
 
-        sf::RenderWindow win(sf::VideoMode(800, 600), "Convolution");
+        sf::RenderWindow win(sf::VideoMode::getFullscreenModes().front(), "Convolution");
         win.setVerticalSyncEnabled(true);
         win.setKeyRepeatEnabled(false);
 
