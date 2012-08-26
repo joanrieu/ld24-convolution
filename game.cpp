@@ -5,7 +5,7 @@
 struct Team {
         std::string name;
         sf::Color color;
-        float score;
+        int score;
 };
 
 struct Cell {
@@ -95,7 +95,7 @@ void Grid::update() {
                         if (stuffIt != stuff.end()) {
 
                                 if (stuffIt->second == Stuff::DeadCell)
-                                        cell.team->score *= 1.05f;
+                                        cell.team->score += 10;
 
                                 stuff.erase(stuffIt);
 
@@ -141,13 +141,13 @@ void Pattern::make(Grid* grid, Team* team, const sf::Vector2i& pos) {
 
 int main() {
 
-        Pattern glider("glider.txt"), spaceship("ship.txt");
-
-        Team playerTeam = { "Player", sf::Color(200, 50, 50), 1.f };
-        Team enemyTeam = { "Enemy", sf::Color(50, 50, 200), 1.f };
+        sf::Color bgColor(59, 55, 55), stuffColor(197, 205, 207);
+        Team playerTeam = { "Player", sf::Color(9, 178, 207), 0 };
+        Team enemyTeam = { "Enemy", sf::Color(204, 9, 9), 0 };
 
         Grid grid;
-        spaceship.make(&grid, &playerTeam, sf::Vector2i(3, 1));
+        Pattern glider("glider.txt"), spaceship("ship.txt");
+        spaceship.make(&grid, &playerTeam, sf::Vector2i(-3, 1));
         glider.make(&grid, &enemyTeam, sf::Vector2i(-5, -3));
 
         sf::RenderWindow win(sf::VideoMode::getFullscreenModes().front(), "Convolution");
@@ -181,7 +181,7 @@ int main() {
 
                 }
 
-                win.clear();
+                win.clear(bgColor);
 
                 auto grid_to_screen = [&](const sf::Vector2i& gridPos) {
                         return (sf::Vector2f(gridPos.x, gridPos.y) - gridAim) * scaling + .5f * sf::Vector2f(win.getSize().x, win.getSize().y);
@@ -198,10 +198,10 @@ int main() {
 
                 std::for_each(grid.stuff.begin(), grid.stuff.end(), [&](const std::pair<sf::Vector2i, Stuff> pair) {
 
-                        sf::CircleShape stuffShape(scaling / 5.f);
+                        sf::RectangleShape stuffShape(sf::Vector2f(scaling / 2.f, scaling / 2.f));
                         stuffShape.setPosition(grid_to_screen(pair.first));
                         stuffShape.move(scaling / 4.f, scaling / 4.f);
-                        stuffShape.setFillColor(sf::Color(50, 200, 50));
+                        stuffShape.setFillColor(stuffColor);
                         win.draw(stuffShape);
 
                 });
