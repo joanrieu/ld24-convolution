@@ -144,7 +144,7 @@ int main() {
         Pattern glider("glider.txt"), spaceship("ship.txt");
 
         Team playerTeam = { "Player", sf::Color(200, 50, 50), 1.f };
-        Team enemyTeam = { "Enemy", sf::Color(50, 200, 50), 1.f };
+        Team enemyTeam = { "Enemy", sf::Color(50, 50, 200), 1.f };
 
         Grid grid;
         spaceship.make(&grid, &playerTeam, sf::Vector2i(3, 1));
@@ -183,17 +183,26 @@ int main() {
 
                 win.clear();
 
+                auto grid_to_screen = [&](const sf::Vector2i& gridPos) {
+                        return (sf::Vector2f(gridPos.x, gridPos.y) - gridAim) * scaling + .5f * sf::Vector2f(win.getSize().x, win.getSize().y);
+                };
+
                 std::for_each(grid.cells.begin(), grid.cells.end(), [&](const std::pair<sf::Vector2i, Cell> pair) {
 
-                        sf::Vector2f cellPos(pair.first.x, pair.first.y);
-                        cellPos -= gridAim;
-                        cellPos *= scaling;
-                        cellPos += .5f * sf::Vector2f(win.getSize().x, win.getSize().y);
-
                         sf::RectangleShape cellShape(sf::Vector2f(scaling, scaling));
-                        cellShape.setPosition(cellPos);
+                        cellShape.setPosition(grid_to_screen(pair.first));
                         cellShape.setFillColor(pair.second.team->color);
                         win.draw(cellShape);
+
+                });
+
+                std::for_each(grid.stuff.begin(), grid.stuff.end(), [&](const std::pair<sf::Vector2i, Stuff> pair) {
+
+                        sf::CircleShape stuffShape(scaling / 5.f);
+                        stuffShape.setPosition(grid_to_screen(pair.first));
+                        stuffShape.move(scaling / 4.f, scaling / 4.f);
+                        stuffShape.setFillColor(sf::Color(50, 200, 50));
+                        win.draw(stuffShape);
 
                 });
 
