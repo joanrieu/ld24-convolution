@@ -1,3 +1,4 @@
+#include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <fstream>
 #include <sstream>
@@ -150,6 +151,11 @@ int main() {
         spaceship.make(&grid, &playerTeam, sf::Vector2i(-3, 1));
         glider.make(&grid, &enemyTeam, sf::Vector2i(-5, -3));
 
+        sf::Music music;
+        music.openFromFile("distant.ogg");
+        music.setLoop(true);
+        music.play();
+
         sf::RenderWindow win(sf::VideoMode::getFullscreenModes().front(), "Convolution");
         win.setVerticalSyncEnabled(true);
         win.setKeyRepeatEnabled(false);
@@ -256,5 +262,7 @@ int main() {
                 win.display();
 
         }
+
+        music.stop();
 
 }

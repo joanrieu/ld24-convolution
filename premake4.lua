@@ -8,4 +8,4 @@ solution "ld24"
                 kind "WindowedApp"
                 language "C++"
                 files "**.cpp"
-                links { "sfml-system", "sfml-window", "sfml-graphics" }
+                links { "sfml-system", "sfml-window", "sfml-graphics", "sfml-audio" }
