@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
+#include <fstream>
 
 struct Team {
         std::string name;
@@ -110,27 +111,44 @@ void Grid::update() {
 
 }
 
+struct Pattern {
+        Pattern(const char* filename) { load(filename); }
+        void load(const char* filename);
+        void make(Grid* grid, Team* team, const sf::Vector2i& pos);
+        std::vector<sf::Vector2i> positions;
+};
+
+void Pattern::load(const char* filename) {
+
+        std::ifstream file(filename);
+
+        int w;
+        file >> w;
+
+        bool isCell;
+        for (int i = 0; file >> isCell; ++i)
+                if (isCell)
+                        positions.push_back(sf::Vector2i(i % w, i / w));
+
+}
+
+void Pattern::make(Grid* grid, Team* team, const sf::Vector2i& pos) {
+        Cell cell = { team, false };
+        std::for_each(positions.begin(), positions.end(), [&](const sf::Vector2i& offset) {
+                grid->cells.insert(std::make_pair(pos + offset, cell));
+        });
+}
+
 int main() {
 
+        Pattern glider("glider.txt"), spaceship("ship.txt");
+
         Team playerTeam = { "Player", sf::Color(200, 50, 50), 1.f };
-        Team enemy1Team = { "Enemy 1", sf::Color(50, 200, 50), 1.f };
-        Team enemy2Team = { "Enemy 2", sf::Color(50, 50, 200), 1.f };
-        Cell playerCell = { &playerTeam, false };
-        Cell enemy1Cell = { &enemy1Team, false };
-        Cell enemy2Cell = { &enemy2Team, false };
+        Team enemyTeam = { "Enemy", sf::Color(50, 200, 50), 1.f };
 
         Grid grid;
-        grid.cells.insert(std::make_pair(sf::Vector2i(0, 0), playerCell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(1, 0), playerCell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(2, 0), playerCell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(2, -1), playerCell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(1, -2), playerCell));/*
-        grid.cells.insert(std::make_pair(sf::Vector2i(0, 1), enemy1Cell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(1, 1), enemy1Cell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(2, 1), enemy1Cell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(0, 2), enemy2Cell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(1, 2), enemy2Cell));
-        grid.cells.insert(std::make_pair(sf::Vector2i(2, 2), enemy2Cell));*/
+        spaceship.make(&grid, &playerTeam, sf::Vector2i(3, 1));
+        glider.make(&grid, &enemyTeam, sf::Vector2i(-5, -3));
 
         sf::RenderWindow win(sf::VideoMode::getFullscreenModes().front(), "Convolution");
         win.setVerticalSyncEnabled(true);
