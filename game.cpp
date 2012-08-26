@@ -1,6 +1,6 @@
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <fstream>
+#include <sstream>
 
 struct Team {
         std::string name;
@@ -170,7 +170,7 @@ int main() {
 
 #                       define BIND(keyname, action) else if (event.type == sf::Event::KeyPressed and event.key.code == sf::Keyboard::keyname) action
                         BIND(Escape, win.close());
-                        BIND(Space, { grid.update(); std::cout << playerTeam.score << std::endl; })
+                        BIND(Space, grid.update());
                         BIND(Add, scaling *= scaleStep);
                         BIND(Subtract, scaling /= scaleStep);
                         BIND(Up, gridAim.y -= moveStep);
@@ -199,12 +199,59 @@ int main() {
                 std::for_each(grid.stuff.begin(), grid.stuff.end(), [&](const std::pair<sf::Vector2i, Stuff> pair) {
 
                         sf::RectangleShape stuffShape(sf::Vector2f(scaling / 2.f, scaling / 2.f));
-                        stuffShape.setPosition(grid_to_screen(pair.first));
+                        stuffShape.move(grid_to_screen(pair.first));
                         stuffShape.move(scaling / 4.f, scaling / 4.f);
                         stuffShape.setFillColor(stuffColor);
                         win.draw(stuffShape);
 
                 });
+
+                { // HUD
+
+                        // HUD lines
+
+                        sf::RectangleShape line(sf::Vector2f(1, 110));
+                        line.setOutlineThickness(1);
+
+                        line.setFillColor(enemyTeam.color);
+                        line.setOutlineColor(enemyTeam.color);
+                        line.move(sf::Vector2f(20, 30));
+                        win.draw(line);
+
+                        line.setFillColor(playerTeam.color);
+                        line.setOutlineColor(playerTeam.color);
+                        line.move(sf::Vector2f(10, 10));
+                        win.draw(line);
+
+                        // HUD text
+
+                        sf::Text score;
+                        score.move(sf::Vector2f(50, 0));
+                        score.rotate(20);
+
+                        score.move(sf::Vector2f(0, 50));
+                        score.setColor(playerTeam.color);
+
+                        {
+                                std::ostringstream ss;
+                                ss << "You: " << playerTeam.score;
+                                score.setString(ss.str());
+                        }
+
+                        win.draw(score);
+
+                        score.move(sf::Vector2f(0, 50));
+                        score.setColor(enemyTeam.color);
+
+                        {
+                                std::ostringstream ss;
+                                ss << "Enemy: " << enemyTeam.score;
+                                score.setString(ss.str());
+                        }
+
+                        win.draw(score);
+
+                }
 
                 win.display();
 
