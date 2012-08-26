@@ -96,7 +96,7 @@ void Grid::update() {
                         if (stuffIt != stuff.end()) {
 
                                 if (stuffIt->second == Stuff::DeadCell)
-                                        cell.team->score += 10;
+                                        ++cell.team->score;
 
                                 stuff.erase(stuffIt);
 
@@ -117,6 +117,7 @@ struct Pattern {
         void make(Grid* grid, Team* team, const sf::Vector2i& pos) const;
         const char* name;
         std::vector<sf::Vector2i> positions;
+        int cost;
 };
 
 Pattern::Pattern(const char* name_, const char* filename): name(name_) {
@@ -130,6 +131,8 @@ Pattern::Pattern(const char* name_, const char* filename): name(name_) {
         for (int i = 0; file >> isCell; ++i)
                 if (isCell)
                         positions.push_back(sf::Vector2i(i % w, i / w));
+
+        cost = positions.size();
 
 }
 
@@ -164,6 +167,8 @@ int main() {
         win.setVerticalSyncEnabled(true);
         win.setKeyRepeatEnabled(false);
 
+        const int scoreMultiplier = 10;
+
         const float scaleStep = 1.5f;
         float scaling = 100.f;
         sf::Vector2i gridAim;
@@ -189,7 +194,12 @@ int main() {
                         BIND(Right, gridAim.x += moveStep);
                         BIND(PageUp, patternIndex = (patterns.size() + patternIndex - 1) % patterns.size());
                         BIND(PageDown, patternIndex = (patternIndex + 1) % patterns.size());
-                        BIND(Return, patterns[patternIndex].make(&grid, &playerTeam, gridAim));
+                        BIND(Return, {
+                                if (patterns[patternIndex].cost <= playerTeam.score) {
+                                        playerTeam.score -= patterns[patternIndex].cost;
+                                        patterns[patternIndex].make(&grid, &playerTeam, gridAim);
+                                }
+                        })
 #                       undef BIND
 
                 }
@@ -200,6 +210,8 @@ int main() {
                         return sf::Vector2f(gridPos.x - gridAim.x, gridPos.y - gridAim.y) * scaling + .5f * sf::Vector2f(win.getSize().x, win.getSize().y);
                 };
 
+                // GRID Cells
+
                 std::for_each(grid.cells.begin(), grid.cells.end(), [&](const std::pair<sf::Vector2i, Cell> pair) {
 
                         sf::RectangleShape cellShape(sf::Vector2f(scaling, scaling));
@@ -208,6 +220,8 @@ int main() {
                         win.draw(cellShape);
 
                 });
+
+                // GRID Stuff
 
                 std::for_each(grid.stuff.begin(), grid.stuff.end(), [&](const std::pair<sf::Vector2i, Stuff> pair) {
 
@@ -247,7 +261,7 @@ int main() {
 
                         {
                                 std::ostringstream ss;
-                                ss << "You: " << playerTeam.score;
+                                ss << "You: " << playerTeam.score * scoreMultiplier;
                                 score.setString(ss.str());
                         }
 
@@ -258,7 +272,7 @@ int main() {
 
                         {
                                 std::ostringstream ss;
-                                ss << "Enemy: " << enemyTeam.score;
+                                ss << "Enemy: " << enemyTeam.score * scoreMultiplier;
                                 score.setString(ss.str());
                         }
 
@@ -281,7 +295,7 @@ int main() {
                                 std::ostringstream ss;
                                 if (i++ == patternIndex)
                                         ss << "> ";
-                                ss << pattern.name;
+                                ss << pattern.name << " (" << pattern.cost * scoreMultiplier << " points)";
                                 text.setString(ss.str());
 
                                 win.draw(text);
