@@ -163,7 +163,9 @@ int main() {
         std::size_t patternIndex = 0;
 
         Grid grid;
-        patterns[7].make(&grid, &playerTeam, sf::Vector2i(-3, 1));
+
+        // TODO: AI
+        // TODO: Beginning
 
         sf::Music music;
         music.openFromFile("distant.ogg");
@@ -219,7 +221,14 @@ int main() {
 
                 // GRID Cells
 
+                bool gameWon = true, gameLost = true;
+
                 std::for_each(grid.cells.begin(), grid.cells.end(), [&](const std::pair<sf::Vector2i, Cell> pair) {
+
+                        if (pair.second.team == &playerTeam)
+                                gameLost = false;
+                        else
+                                gameWon = false;
 
                         sf::RectangleShape cellShape(sf::Vector2f(scaling, scaling));
                         cellShape.setPosition(grid_to_screen(pair.first));
@@ -310,6 +319,20 @@ int main() {
                         text.setCharacterSize(14);
                         text.setString(ss.str());
                         win.draw(text);
+
+                }
+
+                if (gameWon or gameLost) { // HUD game state
+
+                        sf::Text notice;
+                        notice.move(500, 50);
+
+                        if (gameWon)
+                                notice.setString("YOU WON! CONGRATULATIONS! :D");
+                        else
+                                notice.setString("YOU LOST! BOO *sadface*");
+
+                        win.draw(notice);
 
                 }
 
