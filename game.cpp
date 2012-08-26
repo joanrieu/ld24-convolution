@@ -280,27 +280,29 @@ int main() {
 
                 }
 
-                { // HUD pattern select
+                { // HUD pattern select and explainations
+
+                        std::ostringstream ss;
+
+                        ss << "Marketplace:\n";
+
+                        int i = 0;
+                        std::for_each(patterns.begin(), patterns.end(), [&](const Pattern& pattern) {
+                        ss << (i++ == patternIndex ? ">" : "  ") << '\t' << pattern.name << " (" << pattern.cost * scoreMultiplier << " points)\n";
+                        });
+
+                        ss << "\n"
+                        << "Controls:\n"
+                        << "  \tZoom: + / -\n"
+                        << "  \tMove: Arrows\n"
+                        << "  \tSelect Item: PageUp / PageDown\n"
+                        << "  \tBuy & Place Item: Return\n";
 
                         sf::Text text;
                         text.move(sf::Vector2f(50, 200));
                         text.setCharacterSize(14);
-
-                        int i = 0;
-
-                        std::for_each(patterns.begin(), patterns.end(), [&](const Pattern& pattern) {
-
-                                text.move(sf::Vector2f(0, 1.5f * text.getLocalBounds().height));
-
-                                std::ostringstream ss;
-                                if (i++ == patternIndex)
-                                        ss << "> ";
-                                ss << pattern.name << " (" << pattern.cost * scoreMultiplier << " points)";
-                                text.setString(ss.str());
-
-                                win.draw(text);
-
-                        });
+                        text.setString(ss.str());
+                        win.draw(text);
 
                 }
 
