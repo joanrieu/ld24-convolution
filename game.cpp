@@ -113,13 +113,13 @@ void Grid::update() {
 }
 
 struct Pattern {
-        Pattern(const char* filename) { load(filename); }
-        void load(const char* filename);
-        void make(Grid* grid, Team* team, const sf::Vector2i& pos);
+        Pattern(const char* name, const char* filename);
+        void make(Grid* grid, Team* team, const sf::Vector2i& pos) const;
+        const char* name;
         std::vector<sf::Vector2i> positions;
 };
 
-void Pattern::load(const char* filename) {
+Pattern::Pattern(const char* name_, const char* filename): name(name_) {
 
         std::ifstream file(filename);
 
@@ -133,7 +133,7 @@ void Pattern::load(const char* filename) {
 
 }
 
-void Pattern::make(Grid* grid, Team* team, const sf::Vector2i& pos) {
+void Pattern::make(Grid* grid, Team* team, const sf::Vector2i& pos) const {
         Cell cell = { team, false };
         std::for_each(positions.begin(), positions.end(), [&](const sf::Vector2i& offset) {
                 grid->cells.insert(std::make_pair(pos + offset, cell));
@@ -146,10 +146,14 @@ int main() {
         Team playerTeam = { "Player", sf::Color(9, 178, 207), 0 };
         Team enemyTeam = { "Enemy", sf::Color(204, 9, 9), 0 };
 
+        std::vector<Pattern> patterns;
+        patterns.push_back(Pattern("Glider", "glider.txt"));
+        patterns.push_back(Pattern("Light-weight spaceship", "ship.txt"));
+        std::size_t patternIndex = 0;
+
         Grid grid;
-        Pattern glider("glider.txt"), spaceship("ship.txt");
-        spaceship.make(&grid, &playerTeam, sf::Vector2i(-3, 1));
-        glider.make(&grid, &enemyTeam, sf::Vector2i(-5, -3));
+        patterns[1].make(&grid, &playerTeam, sf::Vector2i(-3, 1));
+        patterns[0].make(&grid, &enemyTeam, sf::Vector2i(-5, -3));
 
         sf::Music music;
         music.openFromFile("distant.ogg");
@@ -162,11 +166,11 @@ int main() {
 
         const float scaleStep = 1.5f;
         float scaling = 100.f;
-        sf::Vector2f gridAim;
+        sf::Vector2i gridAim;
 
         while (win.isOpen()) {
 
-                const float moveStep = .05f * win.getSize().x / scaling;
+                const int moveStep = 1 + 20 / scaling;
 
                 sf::Event event;
                 while (win.pollEvent(event)) {
@@ -183,6 +187,9 @@ int main() {
                         BIND(Down, gridAim.y += moveStep);
                         BIND(Left, gridAim.x -= moveStep);
                         BIND(Right, gridAim.x += moveStep);
+                        BIND(PageUp, patternIndex = (patterns.size() + patternIndex - 1) % patterns.size());
+                        BIND(PageDown, patternIndex = (patternIndex + 1) % patterns.size());
+                        BIND(Return, patterns[patternIndex].make(&grid, &playerTeam, gridAim));
 #                       undef BIND
 
                 }
@@ -190,7 +197,7 @@ int main() {
                 win.clear(bgColor);
 
                 auto grid_to_screen = [&](const sf::Vector2i& gridPos) {
-                        return (sf::Vector2f(gridPos.x, gridPos.y) - gridAim) * scaling + .5f * sf::Vector2f(win.getSize().x, win.getSize().y);
+                        return sf::Vector2f(gridPos.x - gridAim.x, gridPos.y - gridAim.y) * scaling + .5f * sf::Vector2f(win.getSize().x, win.getSize().y);
                 };
 
                 std::for_each(grid.cells.begin(), grid.cells.end(), [&](const std::pair<sf::Vector2i, Cell> pair) {
@@ -212,9 +219,7 @@ int main() {
 
                 });
 
-                { // HUD
-
-                        // HUD lines
+                { // HUD lines
 
                         sf::RectangleShape line(sf::Vector2f(1, 110));
                         line.setOutlineThickness(1);
@@ -229,7 +234,9 @@ int main() {
                         line.move(sf::Vector2f(10, 10));
                         win.draw(line);
 
-                        // HUD text
+                }
+
+                { // HUD text
 
                         sf::Text score;
                         score.move(sf::Vector2f(50, 0));
@@ -259,10 +266,50 @@ int main() {
 
                 }
 
+                { // HUD pattern select
+
+                        sf::Text text;
+                        text.move(sf::Vector2f(50, 200));
+                        text.setCharacterSize(14);
+
+                        int i = 0;
+
+                        std::for_each(patterns.begin(), patterns.end(), [&](const Pattern& pattern) {
+
+                                text.move(sf::Vector2f(0, 1.5f * text.getLocalBounds().height));
+
+                                std::ostringstream ss;
+                                if (i++ == patternIndex)
+                                        ss << "> ";
+                                ss << pattern.name;
+                                text.setString(ss.str());
+
+                                win.draw(text);
+
+                        });
+
+                }
+
+                { //HUD crosshair
+
+                        sf::RectangleShape crosshair(sf::Vector2f(3, 3));
+                        crosshair.setFillColor(sf::Color::Transparent);
+                        crosshair.setOutlineThickness(2);
+                        crosshair.setOutlineColor(sf::Color::Black);
+
+                        crosshair.move(.5f * sf::Vector2f(win.getSize().x, win.getSize().y));
+                        crosshair.move(sf::Vector2f(scaling / 2.f, scaling / 2.f));
+
+                        win.draw(crosshair);
+
+                }
+
                 win.display();
 
         }
 
         music.stop();
+
+        return EXIT_SUCCESS;
 
 }
