@@ -150,13 +150,20 @@ int main() {
         Team enemyTeam = { "Enemy", sf::Color(204, 9, 9), 0 };
 
         std::vector<Pattern> patterns;
-        patterns.push_back(Pattern("Glider", "glider.txt"));
-        patterns.push_back(Pattern("Light-weight spaceship", "ship.txt"));
+        patterns.push_back(Pattern("Still: Block", "block.txt"));
+        patterns.push_back(Pattern("Still: Beehive", "beehive.txt"));
+        patterns.push_back(Pattern("Still: Loaf", "loaf.txt"));
+        patterns.push_back(Pattern("Still: Boat", "boat.txt"));
+        patterns.push_back(Pattern("Oscillator: Blinker", "blinker.txt"));
+        patterns.push_back(Pattern("Oscillator: Toad", "toad.txt"));
+        patterns.push_back(Pattern("Oscillator: Beacon", "beacon.txt"));
+        patterns.push_back(Pattern("Oscillator: Pulsar", "pulsar.txt"));
+        patterns.push_back(Pattern("Spaceship: Glider", "glider.txt"));
+        patterns.push_back(Pattern("Spaceship: Light-weight spaceship", "ship.txt"));
         std::size_t patternIndex = 0;
 
         Grid grid;
-        patterns[1].make(&grid, &playerTeam, sf::Vector2i(-3, 1));
-        patterns[0].make(&grid, &enemyTeam, sf::Vector2i(-5, -3));
+        patterns[7].make(&grid, &playerTeam, sf::Vector2i(-3, 1));
 
         sf::Music music;
         music.openFromFile("distant.ogg");
