@@ -325,6 +325,7 @@ int main() {
                         << "  \tAim: Arrows\n"
                         << "  \tSelect Item: PageUp / PageDown\n"
                         << "  \tBuy & Place Item: Return\n"
+                        << "  \tQuit: Escape\n"
                         << '\n'
                         << "Howto:\n"
                         << "  \tTeam Death-Match\n"
