@@ -265,7 +265,7 @@ int main() {
 
                         line.setFillColor(enemyTeam.color);
                         line.setOutlineColor(enemyTeam.color);
-                        line.move(sf::Vector2f(20, 30));
+                        line.move(sf::Vector2f(20, 60));
                         win.draw(line);
 
                         line.setFillColor(playerTeam.color);
@@ -279,9 +279,9 @@ int main() {
 
                         sf::Text score;
                         score.move(sf::Vector2f(50, 0));
-                        score.rotate(20);
+                        score.rotate(-20);
 
-                        score.move(sf::Vector2f(0, 50));
+                        score.move(sf::Vector2f(0, 80));
                         score.setColor(playerTeam.color);
 
                         {
@@ -316,15 +316,28 @@ int main() {
                         ss << (i++ == patternIndex ? ">" : "  ") << '\t' << pattern.name << " (" << pattern.cost * scoreMultiplier << " points)\n";
                         });
 
-                        ss << "\n"
+                        ss
+                        << '\n'
                         << "Controls:\n"
+                        << "  \tEvolution: Space\n"
+                        << "  \tFast Evolution: Backspace\n"
                         << "  \tZoom: + / -\n"
-                        << "  \tMove: Arrows\n"
+                        << "  \tAim: Arrows\n"
                         << "  \tSelect Item: PageUp / PageDown\n"
-                        << "  \tBuy & Place Item: Return\n";
+                        << "  \tBuy & Place Item: Return\n"
+                        << '\n'
+                        << "Howto:\n"
+                        << "  \tTeam Death-Match\n"
+                        << "  \tJust freakin' kill the Reds\n"
+                        << "  \tYou can create new cells ...\n"
+                        << "  \t... by aiming at a white square ...\n"
+                        << "  \t... and buying & placing an item there!\n"
+                        << '\n'
+                        << "Hint: Press [SPACE] !\n"
+                        ;
 
                         sf::Text text;
-                        text.move(sf::Vector2f(50, 200));
+                        text.move(sf::Vector2f(50, 250));
                         text.setCharacterSize(14);
                         text.setString(ss.str());
                         win.draw(text);
@@ -336,16 +349,17 @@ int main() {
                         sf::Text notice;
                         notice.move(500, 50);
 
-                        if (gameWon)
+                        if (gameWon) {
                                 if (playerTeam.score >= enemyTeam.score)
-                                        notice.setString("YOU WON! CONGRATULATIONS! =D");
+                                        notice.setString("YOU WON!\nCONGRATULATIONS! =D");
                                 else
-                                        notice.setString("YOU WON! But your opponent has a higher score! :V");
-                        else
-                                if (playerTeam.score >= enemyTeam.score)
-                                        notice.setString("YOU LOST! At least you have a better score than your enemy... :S");
+                                        notice.setString("YOU WON!\nBut your opponent has a higher score! :V");
+                        } else {
+                                if (playerTeam.score > enemyTeam.score)
+                                        notice.setString("YOU LOST!\nAt least you have a better score than your enemy... :S");
                                 else
-                                        notice.setString("YOU LOST! BOO *sadface*");
+                                        notice.setString("YOU LOST!\nBOO *sadface*");
+                        }
 
                         win.draw(notice);
 
