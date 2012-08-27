@@ -337,9 +337,15 @@ int main() {
                         notice.move(500, 50);
 
                         if (gameWon)
-                                notice.setString("YOU WON! CONGRATULATIONS! :D");
+                                if (playerTeam.score >= enemyTeam.score)
+                                        notice.setString("YOU WON! CONGRATULATIONS! =D");
+                                else
+                                        notice.setString("YOU WON! But your opponent has a higher score! :V");
                         else
-                                notice.setString("YOU LOST! BOO *sadface*");
+                                if (playerTeam.score >= enemyTeam.score)
+                                        notice.setString("YOU LOST! At least you have a better score than your enemy... :S");
+                                else
+                                        notice.setString("YOU LOST! BOO *sadface*");
 
                         win.draw(notice);
 
