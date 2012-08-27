@@ -14,7 +14,7 @@ struct Cell {
         bool undead;
 };
 
-enum class Stuff {
+enum Stuff {
         DeadCell
 };
 
@@ -34,12 +34,12 @@ void Grid::update() {
 
         std::map<sf::Vector2i, std::vector<Team*>, sfVector2i_less> adjacency;
 
-        for (auto cellIt = cells.cbegin(); cellIt != cells.end(); ++cellIt) {
+        for (std::map<sf::Vector2i, Cell, sfVector2i_less>::const_iterator cellIt = cells.begin(); cellIt != cells.end(); ++cellIt) {
 
-                const auto& cellInfo(*cellIt);
+                const std::pair<sf::Vector2i, Cell>& cellInfo(*cellIt);
 
-                auto& cellPos(cellInfo.first);
-                auto& cell(cellInfo.second);
+                const sf::Vector2i& cellPos(cellInfo.first);
+                const Cell& cell(cellInfo.second);
 
                 sf::Vector2i neighbourPos;
                 for (neighbourPos.y = cellPos.y - 1; neighbourPos.y <= cellPos.y + 1; ++neighbourPos.y)
@@ -48,14 +48,14 @@ void Grid::update() {
 
         }
 
-        decltype(cells) nextCells;
+        std::map<sf::Vector2i, Cell, sfVector2i_less>  nextCells;
 
-        for (auto adjacencyIt = adjacency.begin(); adjacencyIt != adjacency.end(); ++adjacencyIt) {
+        for (std::map<sf::Vector2i, std::vector<Team*>, sfVector2i_less>::const_iterator adjacencyIt = adjacency.begin(); adjacencyIt != adjacency.end(); ++adjacencyIt) {
 
-                const std::pair<sf::Vector2i, std::vector<Team*>>& adjacencyInfo(*adjacencyIt);
+                const std::pair<sf::Vector2i, std::vector<Team*> >& adjacencyInfo(*adjacencyIt);
 
-                auto& cellPos(adjacencyInfo.first);
-                auto& neighbours(adjacencyInfo.second);
+                const sf::Vector2i& cellPos(adjacencyInfo.first);
+                const std::vector<Team*>& neighbours(adjacencyInfo.second);
                 int neighbourCount = neighbours.size();
 
                 Team* winningTeam;
@@ -63,14 +63,14 @@ void Grid::update() {
                 {
 
                         std::map<Team*, int> teamMembers;
-                        for (auto neighbourIt = neighbours.begin(); neighbourIt != neighbours.end(); ++neighbourIt) {
-                                const auto& team(*neighbourIt);
+                        for (std::vector<Team*>::const_iterator neighbourIt = neighbours.begin(); neighbourIt != neighbours.end(); ++neighbourIt) {
+                                Team* const& team(*neighbourIt);
                                 ++teamMembers[team];
                         }
 
                         std::map<int, Team*> sortedTeams;
-                        for (auto teamMemberIt = teamMembers.begin(); teamMemberIt != teamMembers.end(); ++teamMemberIt) {
-                                const auto& teamInfo(*teamMemberIt);
+                        for (std::map<Team*, int>::const_iterator teamMemberIt = teamMembers.begin(); teamMemberIt != teamMembers.end(); ++teamMemberIt) {
+                                const std::pair<Team*, int>& teamInfo(*teamMemberIt);
                                 sortedTeams.insert(std::make_pair(teamInfo.second, teamInfo.first));
                         }
 
@@ -78,7 +78,7 @@ void Grid::update() {
 
                 }
 
-                auto cellIt = cells.find(cellPos);
+                const std::map<sf::Vector2i, Cell, sfVector2i_less>::const_iterator cellIt = cells.find(cellPos);
 
                 if (cellIt != cells.end()) {
 
@@ -90,18 +90,18 @@ void Grid::update() {
                         if (neighbourCount == 2 or neighbourCount == 3 or cell.undead)
                                 nextCells.insert(std::make_pair(cellPos, cell));
                         else
-                                stuff.insert(std::make_pair(cellPos, Stuff::DeadCell));
+                                stuff.insert(std::make_pair(cellPos, DeadCell));
 
                 } else if (neighbourCount == 3) { // Cells can only appear with three neighbours
 
                         Cell cell;
                         cell.team = winningTeam;
 
-                        auto stuffIt = stuff.find(cellPos);
+                        const std::map<sf::Vector2i, Stuff>::iterator stuffIt = stuff.find(cellPos);
 
                         if (stuffIt != stuff.end()) {
 
-                                if (stuffIt->second == Stuff::DeadCell)
+                                if (stuffIt->second == DeadCell)
                                         ++cell.team->score;
 
                                 stuff.erase(stuffIt);
@@ -144,8 +144,8 @@ Pattern::Pattern(const char* name_, const char* filename): name(name_) {
 
 void Pattern::make(Grid* grid, Team* team, const sf::Vector2i& pos) const {
         Cell cell = { team, false };
-        for (auto positionIt = positions.begin(); positionIt != positions.end(); ++positionIt) {
-                const auto& offset(*positionIt);
+        for (std::vector<sf::Vector2i>::const_iterator positionIt = positions.begin(); positionIt != positions.end(); ++positionIt) {
+                const sf::Vector2i& offset(*positionIt);
                 grid->cells.insert(std::make_pair(pos + offset, cell));
         }
 }
@@ -235,9 +235,9 @@ int main() {
 
                 bool gameWon = true, gameLost = true;
 
-                for (auto cellIt = grid.cells.begin(); cellIt != grid.cells.end(); ++cellIt) {
+                for (std::map<sf::Vector2i, Cell, sfVector2i_less>::const_iterator cellIt = grid.cells.begin(); cellIt != grid.cells.end(); ++cellIt) {
 
-                        const auto& pair(*cellIt);
+                        const std::pair<sf::Vector2i, Cell>& pair(*cellIt);
 
                         if (pair.second.team == &playerTeam)
                                 gameLost = false;
@@ -253,9 +253,9 @@ int main() {
 
                 // GRID Stuff
 
-                for (auto stuffIt = grid.stuff.begin(); stuffIt != grid.stuff.end(); ++stuffIt) {
+                for (std::map<sf::Vector2i, Stuff, sfVector2i_less>::const_iterator stuffIt = grid.stuff.begin(); stuffIt != grid.stuff.end(); ++stuffIt) {
 
-                        const auto& pair(*stuffIt);
+                        const std::pair<sf::Vector2i, Stuff>& pair(*stuffIt);
 
                         sf::RectangleShape stuffShape(sf::Vector2f(scaling / 2.f, scaling / 2.f));
                         stuffShape.move(sf::Vector2f(pair.first.x - gridAim.x, pair.first.y - gridAim.y) * scaling + .5f * sf::Vector2f(win.getSize().x, win.getSize().y));
@@ -319,8 +319,8 @@ int main() {
                         ss << "Marketplace:\n";
 
                         int i = 0;
-                        for (auto patternIt = patterns.begin(); patternIt != patterns.end(); ++patternIt) {
-                                const auto& pattern(*patternIt);
+                        for (std::vector<Pattern>::const_iterator patternIt = patterns.begin(); patternIt != patterns.end(); ++patternIt) {
+                                const Pattern& pattern(*patternIt);
                                 ss << (i++ == patternIndex ? ">" : "  ") << '\t' << pattern.name << " (" << pattern.cost * scoreMultiplier << " points)\n";
                         }
 
